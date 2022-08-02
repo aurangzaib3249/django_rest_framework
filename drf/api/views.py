@@ -143,34 +143,24 @@ class UserView(FieldCheckView):
             data=request.data
             email=data["email"]
             password=data["password"]
-            if not email:
+            
+            user=authenticate(username=email,password=password)
+            user=UserSerializer(user)
+            data=user.data
+            token,_=Token.objects.get_or_create(user__id=data["id"])
+            data["token"]=str(token.key)
+            data.pop("password")
+            if user:
                 return JsonResponse({
-                    "Status":400,
-                    "Message":"Email is requied"
-                })
-            elif not password:
-                return JsonResponse({
-                    "Status":400,
-                    "Message":"password is requied"
-                })
+                "Status":400,
+                "Message":"login successfully",
+                "data": data
+            })
             else:
-                user=authenticate(username=email,password=password)
-                user=UserSerializer(user)
-                data=user.data
-                token,_=Token.objects.get_or_create(user__id=data["id"])
-                data["token"]=str(token.key)
-                data.pop("password")
-                if user:
-                    return JsonResponse({
+                return JsonResponse({
                     "Status":400,
-                    "Message":"login successfully",
-                    "data": data
+                    "Message":"Wrong username and password"
                 })
-                else:
-                    return JsonResponse({
-                        "Status":400,
-                        "Message":"Wrong username and password"
-                    })
         except KeyError as key:
             print(key)
             return JsonResponse({
