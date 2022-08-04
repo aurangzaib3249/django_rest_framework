@@ -234,7 +234,7 @@ class ConcreteViewPk(UpdateAPIView,DestroyAPIView,RetrieveAPIView):
     
 
 # no need pk in list and create view
-class user_list(GenericAPIView,ListModelMixin,CreateModelMixin):
+class UserList(GenericAPIView,ListModelMixin,CreateModelMixin):
     serializer_class=UserSerializer
     queryset=User.objects.all()
     def get(self,request,*args, **kwargs):
@@ -245,7 +245,7 @@ class user_list(GenericAPIView,ListModelMixin,CreateModelMixin):
    
 
 # need pk for update,delete,and retrieve    
-class user_list_pk(GenericAPIView,DestroyModelMixin,RetrieveModelMixin,UpdateModelMixin):
+class UserListPk(GenericAPIView,DestroyModelMixin,RetrieveModelMixin,UpdateModelMixin):
     serializer_class=UserSerializer
     queryset=User.objects.all()
     lookup_field="pk"
@@ -258,9 +258,5 @@ class user_list_pk(GenericAPIView,DestroyModelMixin,RetrieveModelMixin,UpdateMod
     def get(self,request,*args, **kwargs):
         return self.retrieve(request,*args, **kwargs)
     
-    
-class list1(GenericAPIView):
-    serializer_class=UserSerializer
-    queryset=User.objects.all()
     
 #Generic APIView  end
