@@ -1,3 +1,4 @@
+from urllib import request
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login,authenticate
@@ -10,6 +11,9 @@ from rest_framework import authentication,permissions
 from django.core.exceptions import ObjectDoesNotExist
 from .CustomApiView import *
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import *
+from rest_framework.permissions import *
+from rest_framework.response import Response
 # Create your views here.
 
 class HomeView(APIView):
@@ -138,6 +142,7 @@ class HomeView(APIView):
 class UserView(FieldCheckView):
     
     required_params=['email','password']
+    
     def post(self,request): 
         try:
             data=request.data
@@ -170,3 +175,40 @@ class UserView(FieldCheckView):
     def get(self,request):
         return JsonResponse({"Message":"Valid"})
     
+
+class Auth(GenericAPIView):
+    serializer_class=UserSerializer
+    queryset=User.objects.all()
+    permission_classes=[IsAuthenticated]
+    def get(self,request,*args, **kwargs):
+        user=request.user
+        print("ddd",user)
+        user=UserSerializer(user)
+        data=user.data
+        return Response(data)
+    def post(self,request,*args, **kwargs):
+        user_data=request.data
+        print(user_data)
+        user=self.get_serializer(data=user_data)
+        if user.is_valid():
+            user.save()
+            created_user=User.objects.filter(email=user_data["email"]).first()
+            token,_=Token.objects.get_or_create(user=created_user)
+            da=user.data
+            da["toekn"]=str(token.key)
+            return Response({"Message":"User is Created","User":da})
+        else:
+            return Response(user.errors)
+    
+        
+      
+class TodoList(ListAPIView,CreateAPIView):
+    queryset=Todo.objects.all()
+    serializer_class=TodoSerializer
+    permission_classes=[IsAuthenticated]
+
+class TodoListPk(UpdateAPIView,DestroyAPIView,RetrieveAPIView):
+    queryset=Todo.objects.all()
+    serializer_class=TodoSerializer
+    permission_classes=[IsAuthenticated]
+   
