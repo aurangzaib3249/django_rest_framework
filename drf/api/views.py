@@ -10,6 +10,8 @@ from rest_framework import authentication,permissions
 from django.core.exceptions import ObjectDoesNotExist
 from .CustomApiView import *
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import *
+from rest_framework.mixins import *
 # Create your views here.
 
 class HomeView(APIView):
@@ -170,3 +172,33 @@ class UserView(FieldCheckView):
     def get(self,request):
         return JsonResponse({"Message":"Valid"})
     
+    
+
+class ConcreteGenericViews(ListAPIView,CreateAPIView):
+    serializer_class=TodoSerializer
+    queryset=Todo.objects.all()
+    
+class ConcreteGenericViewsPk(UpdateAPIView,DestroyAPIView,RetrieveAPIView):
+    serializer_class=TodoSerializer
+    queryset=Todo.objects.all()
+    
+    
+
+    
+class MixinViews(GenericAPIView,ListModelMixin,CreateModelMixin):
+    serializer_class=TodoSerializer
+    queryset=Todo.objects.all()
+    def get(self,request,*args, **kwargs):
+        return self.list(request,*args, **kwargs)
+    def post(self,request,*args, **kwargs):
+        return self.create(request,*args, **kwargs)
+    
+class MixinViewsPk(GenericAPIView,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin):
+    serializer_class=TodoSerializer
+    queryset=Todo.objects.all()
+    def get(self,request,*args, **kwargs):
+        return self.retrieve(request,*args, **kwargs)
+    def put(self,request,*args, **kwargs):
+        return self.update(request,*args, **kwargs)
+    def delete(self,request,*args, **kwargs):
+        return self.destroy(request,*args, **kwargs)
