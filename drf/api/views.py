@@ -145,6 +145,7 @@ class UserView(FieldCheckView):
             password=data["password"]
             
             user=authenticate(username=email,password=password)
+            
             user=UserSerializer(user)
             data=user.data
             token,_=Token.objects.get_or_create(user__id=data["id"])
