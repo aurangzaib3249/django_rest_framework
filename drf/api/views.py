@@ -1,15 +1,22 @@
+from webbrowser import get
+from django import dispatch
 from django.http import JsonResponse
 from django.shortcuts import render
+from rest_framework.response import Response
 from django.contrib.auth import login,authenticate
+
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.contrib.auth.decorators import login_required
 from .serializer import *
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin,ListModelMixin,UpdateModelMixin,DestroyModelMixin
 from .models import *
 from rest_framework import authentication,permissions
 from django.core.exceptions import ObjectDoesNotExist
 from .CustomApiView import *
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import *
 # Create your views here.
 
 class HomeView(APIView):
@@ -170,3 +177,72 @@ class UserView(FieldCheckView):
     def get(self,request):
         return JsonResponse({"Message":"Valid"})
     
+class GetToken(GenericAPIView):
+    serializer_class=UserLoginSerializer
+    def post(self,request,*args,**kwargs):
+        try:
+            data=request.data
+            user=authenticate(username=data["email"],password=data["password"])
+            if user:
+                token,_=Token.objects.get_or_create(user=user)
+                token=token.key
+                return Response({"Token":token})
+            else:
+                return Response({"Message":"email or password is incorrect"})
+        except Exception as ex:
+            return Response({"Message":"{} is required".format(ex)})
+class List(GenericAPIView):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+    permission_classes=[IsAuthenticated]
+    def get(self,request,*arhs,**kwargs):
+        user=User.objects.all()
+        data=self.get_serializer(user,many=True)
+        data=data.data
+        return Response(data)
+class Edit(GenericAPIView):
+    serializer_class=UserPutSerializer
+    queryset=User.objects.all()
+    permission_classes=[IsAuthenticated]
+    def get(self,request,*arhs,**kwargs):
+        try:
+            pk=self.kwargs['pk']
+            if pk:
+                user=User.objects.filter(id=pk).first()
+                if user:
+                    data=self.get_serializer(user)
+                    data=data.data
+                    return Response(data)
+                else:
+                    return Response({"Message":"User not found"})
+            else:
+                return Response({"Message":"User id is required"})
+        except Exception as ex:
+           return Response({"Message":"User id is required"})
+    def put(self,request,*args, **kwargs):
+        
+        try:
+            pk=self.kwargs["pk"]
+            data=request.data
+            if pk:
+              user=User.objects.filter(id=pk).update(email=data["email"],full_name=data["full_name"],phone_number=data['phone_number'],address=data['address'])
+              user=User.objects.get(id=pk)
+              data=UserPutSerializer(user)
+              return Response(data.data)
+            else:
+                return Response({"Message":"User id is required"})
+        except Exception as ex:
+            print(ex)
+            return Response({"Message":"invalid id"})
+    def delete(self,request,*args, **kwargs):
+        try:
+            pk=self,kwargs["pk"]
+            user=User.objects.filter(id=pk).first()
+            
+            if user:
+                user.delete()
+                return Response({"Message":"User deleted"})
+            else:
+                return Response({"Message":"User nout found"})
+        except Exception as ex:
+            return Response({"Message":"Error {ex}"})
