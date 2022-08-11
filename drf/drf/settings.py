@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "api",
     'rest_framework.authtoken', 
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'drf.urls'
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'drf.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -65,14 +67,52 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends', 
+                'social_django.context_processors.login_redirect', 
             ],
         },
     },
 ]
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.github.GithubOAuth2',
+    'social_core.backends.twitter.TwitterOAuth',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    
+)
+SOCIAL_AUTH_USER_FIELDS = ['email']
 
+LOGIN_URL = '/login'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = 'home'
 WSGI_APPLICATION = 'drf.wsgi.application'
 AUTH_USER_MODEL="api.User"
 
+SOCIAL_AUTH_USER_MODEL = 'api.User'
+
+
+
+SOCIAL_AUTH_GITHUB_KEY = 'b72eda0d50716c6c22e8'
+SOCIAL_AUTH_GITHUB_SECRET = '0d801e5477762916c262df8cd249f29c95dad34d' 
+SOCIAL_AUTH_FACEBOOK_KEY = '1114066546180641'  
+SOCIAL_AUTH_FACEBOOK_SECRET = 'e89ce57cdf16620c3259d9bf86d7b249'
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+key="AIzaSyBzWjAwvp2feROL_WgIH5iIHd40Gqq1fOI"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -127,7 +167,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+   
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 

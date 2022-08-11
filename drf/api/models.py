@@ -1,17 +1,25 @@
+import random
 from django.db import models
 from django.contrib.auth.models import AbstractUser,BaseUserManager
 from django.utils.translation import gettext_lazy as _
 # Create your models here.
-
+import string  
 class UserManager(BaseUserManager):
-    def create_user(self,email,password,**extra_fields):
+    def create_user(self,email,password=None,**extra_fields):
+        domain="@gmail.com"
+        password="adminasdfghjqweq"
         if not email:
-            raise ValueError("Email is required")
+            ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k = 10))    
+            email="{}{}".format(ran,domain)
+           
         if not password:
-            raise ValueError("Password is required")
+            password=''.join(random.choices(string.ascii_uppercase + string.digits, k = 8))    
+            
         email=self.normalize_email(email)
         user=self.model(email=email,**extra_fields)
-        user.set_password(password)
+        if password:
+            user.set_password(password)
+       
         user.save()
         return user
     def create_superuser(self,email,password,**extra_fields):
