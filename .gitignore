@@ -16,3 +16,5 @@ __pycache__/
 django_app/django_app/__pycache__/
 django_app/app/__pycache__/
 
+.vscode/settings.json
+.gitignore
