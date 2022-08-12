@@ -8,6 +8,7 @@ env/*
 .Python
 build/
 .env
+env
 app/__pycache__/
 dump.rdb
 __pycache__/
