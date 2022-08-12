@@ -1,1 +1,1 @@
-web: gunicorn drf.drf.wsgi
+web: gunicorn drf.wsgi
