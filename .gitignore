@@ -16,5 +16,4 @@ __pycache__/
 **/migrations
 
 *.pem
-**/static/*
 app.text*
