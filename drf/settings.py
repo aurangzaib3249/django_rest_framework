@@ -73,7 +73,7 @@ SOCIALACCOUNT_PROVIDERS = {
 SITE_ID = 1
 
 
-LOGIN_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 # Django All Auth settings
