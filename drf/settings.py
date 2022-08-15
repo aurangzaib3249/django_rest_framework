@@ -87,7 +87,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
          'rest_framework.authentication.TokenAuthentication',
+         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+   
     
 }
 
@@ -132,3 +134,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+from datetime import timedelta
+...
+PASSWORD_RESET_TIMEOUT=900
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=2),
+   
+
+}
