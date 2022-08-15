@@ -7,7 +7,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-
+env
 .env
 app/__pycache__/
 __pycache__/
@@ -15,4 +15,7 @@ __pycache__/
 **/__pycache__
 django_app/django_app/__pycache__/
 django_app/app/__pycache__/
-
+app
+api/migrations/*
+static
+templates

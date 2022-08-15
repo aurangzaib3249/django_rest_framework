@@ -1,3 +1,5 @@
+from base64 import urlsafe_b64decode
+from codecs import utf_16_be_decode
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login,authenticate
@@ -10,11 +12,16 @@ from rest_framework import authentication,permissions
 from django.core.exceptions import ObjectDoesNotExist
 from .CustomApiView import *
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.utils.encoding import force_bytes,smart_str
+from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 # Create your views here.
+from django.contrib.auth.hashers import check_password
 
 class HomeView(APIView):
-    permission_classes=[authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self,request,pk=None):
         if pk:
             todo=Todo.objects.filter(id=pk)
@@ -135,38 +142,81 @@ class HomeView(APIView):
                     }
                 )
     
-class UserView(FieldCheckView):
+
     
-    required_params=['email','password']
-    def post(self,request): 
+class UserProfiles(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self,request,pk=None):
+        user=UserSerializer(request.user)
+        print(user.data)
+        return Response(user.data)
+class RestPassword(APIView):
+    def post(self,request):
         try:
             data=request.data
-            email=data["email"]
-            password=data["password"]
-            
-            user=authenticate(username=email,password=password)
-            user=UserSerializer(user)
-            data=user.data
-            token,_=Token.objects.get_or_create(user__id=data["id"])
-            data["token"]=str(token.key)
-            data.pop("password")
-            if user:
-                return JsonResponse({
-                "Status":400,
-                "Message":"login successfully",
-                "data": data
-            })
+            if data["email"]:
+                sdata=SendEmailSerializer(data=data)
+                if sdata.is_valid():
+                    email=data["email"]
+                    user=User.objects.filter(email=email).first()
+                    if user:
+                        uid=urlsafe_base64_encode(force_bytes(user.id))
+                        token=PasswordResetTokenGenerator().make_token(user)
+                        password_reset_link="http://127.0.0.1:8000/changePassword/"+uid+"/"+token+"/"
+                        print(password_reset_link)
+                        return Response(password_reset_link)
+                    else:
+                        return Response("email not exist")
+                else:
+                    return Response(sdata.errors)
             else:
-                return JsonResponse({
-                    "Status":400,
-                    "Message":"Wrong username and password"
-                })
-        except KeyError as key:
-            print(key)
-            return JsonResponse({
-                        "Status":400,
-                        "Message":"{} field is required".format(key)
-                    })
-    def get(self,request):
-        return JsonResponse({"Message":"Valid"})
+                return Response("Email requied")
+        except KeyError:
+            return Response("Email is required")
+        
+class changePassword(APIView):
+    def post(self,request,uid,token):
+        try:
+            data=request.data
+            if data["password1"]!=data["password2"]:
+                return Response("Password not matched")
+            id=smart_str(urlsafe_base64_decode(uid))
+            user=User.objects.filter(id=id).first()
+            valid=PasswordResetTokenGenerator().check_token(user,token)
+            print(user,valid)
+            if user and  valid:
+                dataserializer=changePasswordSerializer(data=data)
+                if dataserializer.is_valid(raise_exception=True):
+                    password=data["password1"]
+                    user.set_password(password)
+                    user.save()
+                    return Response("set Password")
+                else:
+                    return Response(data.errors)
+            else:
+                return Response("User not found or link expired")
+        except Exception as ex:
+            return Response("ex",ex)
     
+class ChangePasswordWithOldPassword(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self,request,id=None):
+        data=request.data
+        if data:
+            print(data)
+            old=data["old"]
+            user=authenticate(username=request.user.email,password=old)
+            print(user)
+            print( check_password(old, request.user.password))
+            if user:
+                if data["password1"]!=data["password2"]:
+                    return Response("Password not matched")
+                else:
+                    
+                    user.set_password(data["password1"])
+                    user.save()
+                    return Response("Your new password is set")
+            else:
+                return Response("Your password is wrong enter correct password or try to reset with email")
+        else:
+            return Response("Old,password and confirm password is required")
