@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken', 
     'allauth',
     "django_extensions",
+    'crispy_forms',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
@@ -58,8 +59,8 @@ SOCIALACCOUNT_PROVIDERS = {
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
         'APP': {
-            'client_id': '8164655323-tsb4kqpm5gf7t8q4ib5mrtq5kv4e9lm7.apps.googleusercontent.com',
-            'secret': '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',
+            'client_id': '8164655323-786cp6hvpj8lh0imckni31gjqgi1seua.apps.googleusercontent.com',
+            'secret': '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',
             'key': ''
         }
     }
@@ -74,24 +75,29 @@ SITE_ID = 1
 
 
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
 
 # Django All Auth settings
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USER_MODEL_EMAIL_FIELD ="email"
+ACCOUNT_UNIQUE_EMAIL = True
 
-
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'email'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
-
 ACCOUNT_USERNAME_REQUIRED = False
+
 ACCOUNT_SESSION_REMEMBER = True
 
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 3600
 ACCOUNT_USERNAME_BLACKLIST = ['admin', 'superuser', 'user']
-ACCOUNT_FORMS = {'signup': 'user.forms.UserCreationForm'}
+
+
+
+
+
+#ACCOUNT_FORMS = {'signup': 'api.forms.UserCreateForm'}
 
 #SOCIALACCOUNT_EMAIL_REQUIRED = True
 ######3# SOCIALACCOUNT_ADAPTER = 'users.adapter.DisableSocialLoginAdapter'

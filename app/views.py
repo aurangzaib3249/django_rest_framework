@@ -1,9 +1,9 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
 # Creae your views here.
-from django.contrib.auth import login,authenticate
+from django.contrib.auth import login,authenticate,logout
 
-@login_required(login_url="login")
+@login_required()
 def home(request):
     
     return render(request,"home.html")
@@ -19,3 +19,7 @@ def user_login(request):
             login(request,user)
             return redirect("home")
     return render(request,"login.html")
+
+def user_logout(request):
+    logout(request)
+    return redirect("accounts/login")
